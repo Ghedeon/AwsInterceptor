@@ -1,5 +1,5 @@
-#AWS Gateway OkHttp Interceptor
-An [OkHttp interceptor][1] which signs requests with aws signature according to [Signature Version 4 Signing Process][2].
+# AWS Gateway OkHttp Interceptor
+An [OkHttp interceptor][1] which signs requests with [AWS Signature v4][2].
 
 ## Install
 Add ``aws-interceptor`` as a dependency to your ``build.gradle`` file.
@@ -16,8 +16,8 @@ dependencies {
     debugCompile 'com.ghedeon:aws-interceptor:0.1'
 }
 ```
-##Usage
-```
+## Usage
+```java
 AwsInterceptor awsInterceptor = new AwsInterceptor(credentialsProvider, serviceName, region);
  
 OkHttpClient okHttpClient = new OkHttpClient.Builder()
