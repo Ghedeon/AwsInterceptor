@@ -1,3 +1,5 @@
+[ ![Download](https://api.bintray.com/packages/ghedeon/maven/aws-interceptor/images/download.svg) ](https://bintray.com/ghedeon/maven/aws-interceptor/_latestVersion)
+
 # AWS Gateway OkHttp Interceptor
 An [OkHttp interceptor][1] which signs requests with [AWS Signature v4][2].
 
@@ -13,7 +15,7 @@ repositories {
 ...
 
 dependencies {
-    debugCompile 'com.ghedeon:aws-interceptor:0.1'
+    debugCompile 'com.ghedeon:aws-interceptor:<check badge for latest version>'
 }
 ```
 ## Usage
