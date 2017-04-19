@@ -40,18 +40,14 @@ public class AwsInterceptor implements Interceptor {
     @NonNull
     private final String serviceName;
     @NonNull
-    private final String region;
-    @NonNull
     private final AWS4Signer signer;
-    @NonNull
-    private com.amazonaws.Request awsDummyRequest;
 
     public AwsInterceptor(@NonNull AWSCredentialsProvider credentialsProvider, @NonNull String serviceName, @NonNull String region) {
         this.credentialsProvider = credentialsProvider;
         this.serviceName = serviceName;
-        this.region = region;
         signer = new AWS4Signer();
-        awsDummyRequest = new DefaultRequest(serviceName);
+        signer.setServiceName(serviceName);
+        signer.setRegionName(region);
     }
 
     @Override
@@ -73,11 +69,10 @@ public class AwsInterceptor implements Interceptor {
     @SuppressWarnings("unchecked")
     @NonNull
     private Map<String, String> getAwsHeaders(@NonNull URI endpoint, @NonNull HttpMethodName methodName) {
+        DefaultRequest awsDummyRequest = new DefaultRequest(serviceName);
         awsDummyRequest.setEndpoint(endpoint);
         awsDummyRequest.setHttpMethod(methodName);
 
-        signer.setServiceName(serviceName);
-        signer.setRegionName(region);
         signer.sign(awsDummyRequest, credentialsProvider.getCredentials());
 
         return awsDummyRequest.getHeaders();
