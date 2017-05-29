@@ -19,19 +19,19 @@ dependencies {
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
-def VERSION_NAME = 0.1
+def VERSION_NAME = 0.3
 def ARTIFACT_ID = 'aws-interceptor'
 
 publish {
     bintrayUser = BINTRAY_USER
     bintrayKey = BINTRAY_KEY
     dryRun = false
-    autoPublish = false
+    autoPublish = true
     userOrg = 'ghedeon'
     groupId = 'com.ghedeon'
     artifactId = 'aws-interceptor'
     uploadName = 'aws-interceptor'
-    publishVersion = '0.1'
+    publishVersion = '0.3'
     desc = 'AWS Gateway OkHttp interceptor'
     website = 'https://github.com/Ghedeon/awsinterceptor'
     licences = ['Apache-2.0']

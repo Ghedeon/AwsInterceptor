@@ -18,19 +18,17 @@
 package com.ghedeon;
 
 import android.support.annotation.NonNull;
-
 import com.amazonaws.DefaultRequest;
 import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.http.HttpMethodName;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import java.io.IOException;
+import java.util.Map;
 
 
 public class AwsInterceptor implements Interceptor {
@@ -53,12 +51,12 @@ public class AwsInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request originalRequest = chain.request();
-
-        URI endpoint = originalRequest.url().uri();
-        HttpMethodName methodName = HttpMethodName.valueOf(originalRequest.method());
-        Map<String, String> headers = getAwsHeaders(endpoint, methodName);
-
         Request.Builder builder = originalRequest.newBuilder();
+
+        HttpUrl url = ensureTrailingSlash(builder, originalRequest.url());
+
+        HttpMethodName methodName = HttpMethodName.valueOf(originalRequest.method());
+        Map<String, String> headers = getAwsHeaders(url, methodName);
         for (Map.Entry<String, String> header : headers.entrySet()) {
             builder.header(header.getKey(), header.getValue());
         }
@@ -66,12 +64,27 @@ public class AwsInterceptor implements Interceptor {
         return chain.proceed(builder.build());
     }
 
+    @NonNull
+    private HttpUrl ensureTrailingSlash(@NonNull Request.Builder builder, @NonNull HttpUrl url) {
+        String lastPathSegment = url.pathSegments().get(url.pathSize() - 1);
+        if (!lastPathSegment.isEmpty()) {
+            url = url.newBuilder().addPathSegment("").build();
+            builder.url(url);
+        }
+
+        return url;
+    }
+
     @SuppressWarnings("unchecked")
     @NonNull
-    private Map<String, String> getAwsHeaders(@NonNull URI endpoint, @NonNull HttpMethodName methodName) {
+    private Map<String, String> getAwsHeaders(@NonNull HttpUrl url, @NonNull HttpMethodName methodName) {
         DefaultRequest awsDummyRequest = new DefaultRequest(serviceName);
-        awsDummyRequest.setEndpoint(endpoint);
+        awsDummyRequest.setEndpoint(url.uri());
         awsDummyRequest.setHttpMethod(methodName);
+
+        for (String paramName : url.queryParameterNames()) {
+            awsDummyRequest.addParameter(paramName, url.queryParameter(paramName));
+        }
 
         signer.sign(awsDummyRequest, credentialsProvider.getCredentials());
 
