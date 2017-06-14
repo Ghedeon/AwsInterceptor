@@ -17,7 +17,6 @@
 
 package com.ghedeon;
 
-import android.support.annotation.NonNull;
 import com.amazonaws.DefaultRequest;
 import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -27,20 +26,21 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Map;
 
 
 public class AwsInterceptor implements Interceptor {
 
-    @NonNull
+    @Nonnull
     private final AWSCredentialsProvider credentialsProvider;
-    @NonNull
+    @Nonnull
     private final String serviceName;
-    @NonNull
+    @Nonnull
     private final AWS4Signer signer;
 
-    public AwsInterceptor(@NonNull AWSCredentialsProvider credentialsProvider, @NonNull String serviceName, @NonNull String region) {
+    public AwsInterceptor(@Nonnull AWSCredentialsProvider credentialsProvider, @Nonnull String serviceName, @Nonnull String region) {
         this.credentialsProvider = credentialsProvider;
         this.serviceName = serviceName;
         signer = new AWS4Signer();
@@ -64,8 +64,8 @@ public class AwsInterceptor implements Interceptor {
         return chain.proceed(builder.build());
     }
 
-    @NonNull
-    private HttpUrl ensureTrailingSlash(@NonNull Request.Builder builder, @NonNull HttpUrl url) {
+    @Nonnull
+    private HttpUrl ensureTrailingSlash(@Nonnull Request.Builder builder, @Nonnull HttpUrl url) {
         String lastPathSegment = url.pathSegments().get(url.pathSize() - 1);
         if (!lastPathSegment.isEmpty()) {
             url = url.newBuilder().addPathSegment("").build();
@@ -76,8 +76,8 @@ public class AwsInterceptor implements Interceptor {
     }
 
     @SuppressWarnings("unchecked")
-    @NonNull
-    private Map<String, String> getAwsHeaders(@NonNull HttpUrl url, @NonNull HttpMethodName methodName) {
+    @Nonnull
+    private Map<String, String> getAwsHeaders(@Nonnull HttpUrl url, @Nonnull HttpMethodName methodName) {
         DefaultRequest awsDummyRequest = new DefaultRequest(serviceName);
         awsDummyRequest.setEndpoint(url.uri());
         awsDummyRequest.setHttpMethod(methodName);

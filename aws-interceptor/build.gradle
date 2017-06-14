@@ -1,37 +1,29 @@
 apply plugin: 'java'
 apply plugin: 'com.novoda.bintray-release'
 
-def logger = new com.android.build.gradle.internal.LoggerWrapper(project.logger)
-def sdkHandler = new com.android.build.gradle.internal.SdkHandler(project, logger)
-for (File file : sdkHandler.sdkLoader.repositories) {
-    project.repositories.maven {
-        url = file.toURI()
-    }
-}
-
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-annotations:25.3.0'
-    compile 'com.squareup.okhttp3:okhttp:3.6.0'
-    compile 'com.amazonaws:aws-android-sdk-apigateway-core:2.3.9'
+    compile 'com.amazonaws:aws-android-sdk-core:2.4.4'
+    compileOnly 'com.squareup.okhttp3:okhttp:3.8.0'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
-def VERSION_NAME = 0.3
+def VERSION_NAME = 0.4
 def ARTIFACT_ID = 'aws-interceptor'
 
 publish {
     bintrayUser = BINTRAY_USER
     bintrayKey = BINTRAY_KEY
-    dryRun = false
+    dryRun = true
     autoPublish = true
     userOrg = 'ghedeon'
     groupId = 'com.ghedeon'
-    artifactId = 'aws-interceptor'
-    uploadName = 'aws-interceptor'
-    publishVersion = '0.3'
+    artifactId = "$ARTIFACT_ID"
+    uploadName = "$ARTIFACT_ID"
+    publishVersion = "$VERSION_NAME"
     desc = 'AWS Gateway OkHttp interceptor'
     website = 'https://github.com/Ghedeon/awsinterceptor'
     licences = ['Apache-2.0']
