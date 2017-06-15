@@ -11,7 +11,7 @@ dependencies {
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
-def VERSION_NAME = 0.4
+def VERSION_NAME = 0.5
 def ARTIFACT_ID = 'aws-interceptor'
 
 publish {
