@@ -21,12 +21,12 @@ import com.amazonaws.DefaultRequest;
 import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.http.HttpMethodName;
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import okio.Buffer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -49,19 +49,68 @@ public class AwsInterceptor implements Interceptor {
     }
 
     @Override
-    public Response intercept(Chain chain) throws IOException {
-        Request originalRequest = chain.request();
-        Request.Builder builder = originalRequest.newBuilder();
+    public Response intercept(@Nonnull Chain chain) throws IOException {
+        Request signedRequest = sign(chain.request());
 
-        HttpUrl url = ensureTrailingSlash(builder, originalRequest.url());
+        return chain.proceed(signedRequest);
+    }
 
-        HttpMethodName methodName = HttpMethodName.valueOf(originalRequest.method());
-        Map<String, String> headers = getAwsHeaders(url, methodName);
+    @SuppressWarnings("unchecked")
+    @Nonnull
+    private Request sign(@Nonnull Request request) throws IOException {
+        Request.Builder builder = request.newBuilder();
+        DefaultRequest awsDummyRequest = new DefaultRequest(serviceName);
+
+        HttpUrl url = setEndpoint(builder, awsDummyRequest, request.url());
+
+        setQueryParams(awsDummyRequest, url);
+
+        setHttpMethod(awsDummyRequest, request.method());
+
+        setBody(awsDummyRequest, request.body());
+
+        signer.sign(awsDummyRequest, credentialsProvider.getCredentials());
+
+        applyAwsHeaders(builder, awsDummyRequest.getHeaders());
+
+        return builder.build();
+    }
+
+    @Nonnull
+    private HttpUrl setEndpoint(@Nonnull Request.Builder builder, @Nonnull DefaultRequest awsRequest, @Nonnull HttpUrl url) {
+        HttpUrl canonicalUrl = ensureTrailingSlash(builder, url);
+        awsRequest.setEndpoint(canonicalUrl.uri());
+
+        return canonicalUrl;
+    }
+
+    private void setQueryParams(@Nonnull DefaultRequest awsRequest, @Nonnull HttpUrl url) {
+        for (String paramName : url.queryParameterNames()) {
+            awsRequest.addParameter(paramName, url.queryParameter(paramName));
+        }
+    }
+
+    private void setHttpMethod(@Nonnull DefaultRequest awsRequest, @Nonnull String method) {
+        HttpMethodName methodName = HttpMethodName.valueOf(method);
+        awsRequest.setHttpMethod(methodName);
+    }
+
+    private void setBody(@Nonnull DefaultRequest awsRequest, @Nullable RequestBody body) throws IOException {
+        if (body == null) {
+            return;
+        }
+
+        Buffer buffer = new Buffer();
+        body.writeTo(buffer);
+        awsRequest.setContent(new BufferedInputStream(buffer.inputStream()));
+        awsRequest.addHeader("Content-Length", String.valueOf(body.contentLength()));
+        buffer.close();
+    }
+
+    private void applyAwsHeaders(@Nonnull Request.Builder builder, @Nonnull Map<String, String> headers) {
         for (Map.Entry<String, String> header : headers.entrySet()) {
             builder.header(header.getKey(), header.getValue());
         }
-
-        return chain.proceed(builder.build());
     }
 
     @Nonnull
@@ -75,19 +124,4 @@ public class AwsInterceptor implements Interceptor {
         return url;
     }
 
-    @SuppressWarnings("unchecked")
-    @Nonnull
-    private Map<String, String> getAwsHeaders(@Nonnull HttpUrl url, @Nonnull HttpMethodName methodName) {
-        DefaultRequest awsDummyRequest = new DefaultRequest(serviceName);
-        awsDummyRequest.setEndpoint(url.uri());
-        awsDummyRequest.setHttpMethod(methodName);
-
-        for (String paramName : url.queryParameterNames()) {
-            awsDummyRequest.addParameter(paramName, url.queryParameter(paramName));
-        }
-
-        signer.sign(awsDummyRequest, credentialsProvider.getCredentials());
-
-        return awsDummyRequest.getHeaders();
-    }
 }
