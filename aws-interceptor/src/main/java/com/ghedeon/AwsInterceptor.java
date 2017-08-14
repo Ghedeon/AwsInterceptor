@@ -26,7 +26,7 @@ import okio.Buffer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -102,7 +102,7 @@ public class AwsInterceptor implements Interceptor {
 
         Buffer buffer = new Buffer();
         body.writeTo(buffer);
-        awsRequest.setContent(new BufferedInputStream(buffer.inputStream()));
+        awsRequest.setContent(new ByteArrayInputStream(buffer.readByteArray()));
         awsRequest.addHeader("Content-Length", String.valueOf(body.contentLength()));
         buffer.close();
     }
