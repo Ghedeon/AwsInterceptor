@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/AwsGatewayInterceptor.iml" filepath="$PROJECT_DIR$/.idea/modules/AwsGatewayInterceptor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AwsInterceptor.iml" filepath="$PROJECT_DIR$/.idea/modules/AwsInterceptor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/aws-interceptor/AwsInterceptor.aws-interceptor.iml" filepath="$PROJECT_DIR$/.idea/modules/aws-interceptor/AwsInterceptor.aws-interceptor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample/AwsInterceptor.sample.iml" filepath="$PROJECT_DIR$/.idea/modules/sample/AwsInterceptor.sample.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/aws-interceptor/aws-interceptor.iml" filepath="$PROJECT_DIR$/.idea/modules/aws-interceptor/aws-interceptor.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample/sample.iml" filepath="$PROJECT_DIR$/.idea/modules/sample/sample.iml" />
     </modules>

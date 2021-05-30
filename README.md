@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/ghedeon/maven/aws-interceptor/images/download.svg) ](https://bintray.com/ghedeon/maven/aws-interceptor/_latestVersion)
+[![](https://jitpack.io/v/Ghedeon/AwsInterceptor.svg)](https://jitpack.io/#Ghedeon/AwsInterceptor)
 
 # AWS Gateway OkHttp Interceptor
 An [OkHttp interceptor][1] which signs requests with [AWS Signature v4][2].
@@ -7,24 +7,23 @@ An [OkHttp interceptor][1] which signs requests with [AWS Signature v4][2].
 Add ``aws-interceptor`` as a dependency to your ``build.gradle`` file.
 ```
 repositories {
-    maven {
-        url "http://dl.bintray.com/ghedeon/maven"
-    }
+    maven { url "https://jitpack.io" }
 }
 
 ...
 
 dependencies {
-    debugCompile 'com.ghedeon:aws-interceptor:<check badge for latest version>'
+    implementation 'com.ghedeon:aws-interceptor:<check badge for latest version>'
 }
 ```
 ## Usage
-```java
-AwsInterceptor awsInterceptor = new AwsInterceptor(credentialsProvider, serviceName, region);
- 
-OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(awsInterceptor)
-                .build();
+
+```kotlin
+val awsInterceptor = AwsInterceptor(MyAWSCredentialsProvider(), serviceName, region)
+
+val okHttpClient = OkHttpClient.Builder()
+    .addInterceptor(awsInterceptor)
+    .build()
 ```
 check `sample` module for more details
 
