@@ -17,24 +17,22 @@
 package com.ghedeon
 
 import com.amazonaws.DefaultRequest
-import com.amazonaws.auth.AWS4Signer
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.http.HttpMethodName
+import com.amplifyframework.api.aws.sigv4.ApiGatewayIamSigner
 import okhttp3.*
 import okio.Buffer
 import java.io.ByteArrayInputStream
 
-@Suppress("MemberVisibilityCanBePrivate")
 class AwsInterceptor(
-    val credentialsProvider: AWSCredentialsProvider,
-    val serviceName: String,
-    val region: String
+    private val credentialsProvider: AWSCredentialsProvider,
+    private val serviceName: String,
+    private val region: String
 ) : Interceptor {
 
     private val signer by lazy {
-        AWS4Signer().apply {
+        ApiGatewayIamSigner(region).apply {
             setServiceName(serviceName)
-            setRegionName(region)
         }
     }
 
@@ -44,18 +42,17 @@ class AwsInterceptor(
     }
 
     private fun Request.sign(): Request {
-        val canonicalUrl = url.canonicalized()
         val awsDummyRequest = DefaultRequest<Any>(serviceName).apply {
-            endpoint = canonicalUrl.toUri()
+            endpoint = url.toUri()
             httpMethod = HttpMethodName.valueOf(method)
-            setQueryParams(canonicalUrl)
+            setQueryParams(url)
             setBody(body)
         }
 
         signer.sign(awsDummyRequest, credentialsProvider.credentials)
 
         return newBuilder()
-            .url(canonicalUrl)
+            .url(url)
             .applyAwsHeaders(awsDummyRequest.headers)
             .build()
     }
@@ -80,8 +77,3 @@ private fun Request.Builder.applyAwsHeaders(headers: Map<String, String>): Reque
     headers.entries.forEach { header(it.key, it.value) }
     return this
 }
-
-private fun HttpUrl.canonicalized(): HttpUrl =
-    if (pathSegments.last().isNotEmpty()) {
-        newBuilder().addPathSegment("").build()
-    } else this
